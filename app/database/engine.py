@@ -12,7 +12,7 @@ DATABASE_URL = f'postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{
 
 engine: Engine = create_engine(DATABASE_URL)
 
-sync_session_maker = sessionmaker(engine, expire_on_commit=False)
+# sync_session_maker = sessionmaker(engine, expire_on_commit=False)
 
 
 class Base(DeclarativeBase):
