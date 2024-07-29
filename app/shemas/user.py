@@ -1,10 +1,13 @@
 from typing import Optional, Iterable, Type
 
 import re
-from pydantic import BaseModel, EmailStr, Extra, HttpUrl, field_validator
+from pydantic import BaseModel, EmailStr, Extra, HttpUrl, field_validator, ConfigDict
 
 
-class User(BaseModel, extra=Extra.forbid):
+class User(BaseModel):
+
+    model_config = ConfigDict(extra='forbid')
+
     id: int
     email: EmailStr
     first_name: str
@@ -12,13 +15,16 @@ class User(BaseModel, extra=Extra.forbid):
     avatar: HttpUrl
 
 
-class Users(BaseModel, extra=Extra.forbid):
+class Users(BaseModel):
     """Из-за особенности пагинации, что используем в ендпоинте тут модель выглядит не как оригинал.
 
     Посмотрел по коду, как менять модель в пагинации и там на первый взгляд это не так просто
     окозалось, поэтому решил пока так оставить. Чтобы было ясно, там нужно в класс пагинации что-то
     переназначить/указывать, чтобы он иначе обрабатывал пагинацию
     """
+
+    model_config = ConfigDict(extra='forbid')
+
     data: list | list[User]
     total: int
     page: int
@@ -26,7 +32,10 @@ class Users(BaseModel, extra=Extra.forbid):
     total_pages: int
 
 
-class UserCreate(BaseModel, extra=Extra.forbid):
+class UserCreate(BaseModel):
+
+    model_config = ConfigDict(extra='forbid')
+
     email: EmailStr
     first_name: str
     last_name: str
@@ -54,7 +63,10 @@ class UserCreate(BaseModel, extra=Extra.forbid):
         return value
 
 
-class UserUpdate(BaseModel, extra=Extra.forbid):
+class UserUpdate(BaseModel):
+
+    model_config = ConfigDict(extra='forbid')
+
     email: EmailStr | None = None
     first_name: str | None = None
     last_name: str | None = None

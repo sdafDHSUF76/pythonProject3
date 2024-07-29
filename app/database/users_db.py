@@ -48,12 +48,12 @@ def get_users() -> list[Userr]:
 
 def create_user(user: UserCreate) -> dict:
     with Session(engine) as session:
-        session.execute(insert(User).values(**user.dict()))
+        session.execute(insert(User).values(**user.model_dump()))
         session.commit()
         # session.refresh(user)
-        result = session.execute(select(User).filter_by(**user.dict()).order_by(User.id.asc()).limit(1)).scalars().all()
+        result = session.execute(select(User).filter_by(**user.model_dump()).order_by(User.id.asc()).limit(1)).scalars().all()
         return {
-            "name": user.dict().get('first_name'),
+            "name": user.model_dump().get('first_name'),
             "job": "leader",
             "id": str(result[0].id),
             "createdAt": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"

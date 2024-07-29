@@ -204,7 +204,7 @@ def test_user_invalid_values(app_url: str, user_id: int):
 def test_users_invalid_page_and_size(app_url: str, page: int | str, size: int | str):
     response: Response = requests.get(f"{app_url}/api/users/?page={page}&size={size}")
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
-    ErrorParams.parse_obj(response.json())
+    ErrorParams.model_validate(response.json())
 
 
 def test_users_correct_values_page_and_size(
@@ -213,7 +213,7 @@ def test_users_correct_values_page_and_size(
     page, size, expected_count_user, total_users = page_and_size_parametrize
     response: Response = requests.get(f"{app_url}/api/users/?page={page}&per_page={size}")
     assert response.status_code == HTTPStatus.OK
-    response_payload: dict = Users.parse_obj(response.json()).dict()
+    response_payload: dict = Users.model_validate(response.json()).model_dump()
     assert len(response_payload['data']) == expected_count_user
     assert response_payload['total'] == total_users
     assert response_payload['page'] == page
@@ -227,7 +227,7 @@ def test_users_different_users_depending_on_page(
     size, page, expected_id_users = different_page
     response: Response = requests.get(f"{app_url}/api/users/?page={page}&per_page={size}")
     assert response.status_code == HTTPStatus.OK
-    response_payload: dict = Users.parse_obj(response.json()).dict()
+    response_payload: dict = Users.model_validate(response.json()).model_dump()
     current_user_id = [
         unit['id'] for unit in response_payload['data'] if len(response_payload['data'])
     ]
@@ -245,32 +245,32 @@ def test_users_different_users_depending_on_page(
 def test_users_invalid_page(app_url: str, page: int | str | float):
     response: Response = requests.get(f"{app_url}/api/users/?page={page}")
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
-    ErrorParams.parse_obj(response.json())
+    ErrorParams.model_validate(response.json())
 
 
 @pytest.mark.parametrize("size", [-1, 0, "fafaf", "@/*$%^&#*/()?>,.*/\"", 99999999, 'None', 1.5])
 def test_users_invalid_size(app_url: str, size: int | str | float):
     response: Response = requests.get(f"{app_url}/api/users/?per_page={size}")
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
-    ErrorParams.parse_obj(response.json())
+    ErrorParams.model_validate(response.json())
 
 
 def test_users_page(app_url: str, data_page: int):
     response: Response = requests.get(f"{app_url}/api/users/?page={data_page}")
     assert response.status_code == HTTPStatus.OK
-    Users.parse_obj(response.json())
+    Users.model_validate(response.json())
 
 
 def test_users_size(app_url: str, data_size: int):
     response: Response = requests.get(f"{app_url}/api/users/?per_page={data_size}")
     assert response.status_code == HTTPStatus.OK
-    Users.parse_obj(response.json())
+    Users.model_validate(response.json())
 
 
 def test_users(app_url: str):
     response: Response = requests.get(f"{app_url}/api/users/")
     assert response.status_code == HTTPStatus.OK
-    Users.parse_obj(response.json())
+    Users.model_validate(response.json())
 
 
 def test_update(app_url: str, db_mydb: MyDB):
@@ -279,7 +279,7 @@ def test_update(app_url: str, db_mydb: MyDB):
         json={'first_name': '1234'}
     )
     assert response.status_code == HTTPStatus.OK
-    User.parse_obj(response.json())
+    User.model_validate(response.json())
     assert db_mydb.get_value('select first_name from users where id = 1')[0][0] == '1234'
 
 
@@ -298,7 +298,7 @@ def test_update_not_correct_payload(app_url: str):
         json={'first_name': 1234}
     )
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
-    ErrorParams.parse_obj(response.json())
+    ErrorParams.model_validate(response.json())
     # assert response.json() == {'detail': 'User not found'}
 
 
@@ -327,7 +327,7 @@ def test_post_not_correct_email(app_url: str):
 }
     )
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
-    ErrorParams.parse_obj(response.json())
+    ErrorParams.model_validate(response.json())
 
 def test_post_not_correct_avatar(app_url: str):
     response: Response = requests.post(
@@ -340,7 +340,7 @@ def test_post_not_correct_avatar(app_url: str):
 }
     )
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
-    ErrorParams.parse_obj(response.json())
+    ErrorParams.model_validate(response.json())
 
 
 def test_delete(app_url: str, db_mydb: MyDB):
