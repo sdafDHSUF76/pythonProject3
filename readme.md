@@ -37,7 +37,7 @@ pip install -r requirements.txt
 docker compose up
 ```
 
-Проводим миграцию
+Проводим миграцию, это для создания таблицы нужно
 ```bash
 alembic upgrade head
 ```

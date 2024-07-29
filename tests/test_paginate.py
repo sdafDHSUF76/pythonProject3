@@ -8,7 +8,7 @@ from requests import Response
 
 from app.shemas.error_list import ErrorParams
 from app.shemas.user import Users
-from tests.fixtures.database import MyDB, configs_for_db
+from tests.fixtures.database import MyDB, configs_for_db, connect, db_mydb  # noqa F401
 from tests.utils import calculate_pages, fill_users_table
 
 if TYPE_CHECKING:

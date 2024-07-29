@@ -9,9 +9,9 @@ from tests.fixtures.database import db_mydb  # noqa F401
 from tests.test_smoke import test_server_is_ready
 from tests.utils import fill_users_table
 
-
 if TYPE_CHECKING:
     from _pytest.main import Session
+
     from tests.fixtures.database import MyDB
 
 

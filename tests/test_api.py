@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from typing import TYPE_CHECKING
 
 import pytest
 import requests
@@ -6,7 +7,10 @@ from requests import Response
 
 from app.shemas.error_list import ErrorParams
 from app.shemas.user import User, Users
-from tests.fixtures.database import MyDB
+from tests.fixtures.database import connect, db_mydb  # noqa F401
+
+if TYPE_CHECKING:
+    from tests.fixtures.database import MyDB
 
 
 @pytest.mark.usefixtures('prepare_table_users')
@@ -37,7 +41,7 @@ class TestsApi:
         assert response.status_code == HTTPStatus.OK
         Users.model_validate(response.json())
 
-    def test_update(self, app_url: str, db_mydb: MyDB):
+    def test_update(self, app_url: str, db_mydb: 'MyDB'):  # noqa F811
         response: Response = requests.patch(
             f"{app_url}/api/users/1",
             json={'first_name': '1234'}
@@ -62,7 +66,7 @@ class TestsApi:
         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
         ErrorParams.model_validate(response.json())
 
-    def test_post(self, app_url: str, db_mydb: MyDB):
+    def test_post(self, app_url: str, db_mydb: 'MyDB'):  # noqa F811
         response: Response = requests.post(
             f"{app_url}/api/users/",
             json={
@@ -103,7 +107,7 @@ class TestsApi:
         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
         ErrorParams.model_validate(response.json())
 
-    def test_delete(self, app_url: str, db_mydb: MyDB):
+    def test_delete(self, app_url: str, db_mydb: 'MyDB'):  # noqa F811
         response: Response = requests.delete(
             f"{app_url}/api/users/1",
         )
@@ -112,7 +116,7 @@ class TestsApi:
         # response_payload: dict = User.parse_obj().dict()
         assert not len(db_mydb.get_value('select first_name from users where id = 1'))
 
-    def test_delete_not_user(self, app_url: str, db_mydb: MyDB):
+    def test_delete_not_user(self, app_url: str, db_mydb: 'MyDB'):  # noqa F811
         response: Response = requests.delete(
             f"{app_url}/api/users/21",
         )
@@ -123,7 +127,7 @@ class TestsApi:
         # response_payload: dict = User.parse_obj().dict()
         assert not len(db_mydb.get_value('select first_name from users where id = 21'))
 
-    def test_delete_not_found(self, app_url: str, db_mydb: MyDB):
+    def test_delete_not_found(self, app_url: str, db_mydb: 'MyDB'):  # noqa F811
         requests.delete(
             f"{app_url}/api/users/2",
         )

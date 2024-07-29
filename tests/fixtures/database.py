@@ -1,14 +1,18 @@
+import os
+
+import dotenv
 import psycopg2
 import pytest
 import structlog as structlog
 
+dotenv.load_dotenv(''.join((os.path.abspath(__file__).split('tests')[0], '.env.sample')))
 logger = structlog.get_logger('sql')
 configs_for_db = dict(
-    dbname='mydb',
-    user='myuser',
-    password='mypassword',
-    host='127.0.0.1',
-    port='5436'
+    dbname=os.getenv('DB_NAME'),
+    user=os.getenv('USER_NAME'),
+    password=os.getenv('PASSWORD_FOR_DB'),
+    host=os.getenv('HOST_DB'),
+    port=os.getenv('PORT_DB')
 )
 
 
