@@ -4,56 +4,21 @@ from typing import TYPE_CHECKING
 import dotenv
 import pytest
 from _pytest.python import Function
-import psycopg2
-from psycopg2 import Error
-# from psycopg2 import connection
 
-from tests.fixtures.database import MyDB
+from tests.fixtures.database import db_mydb  # noqa F401
 from tests.test_smoke import test_server_is_ready
 from tests.utils import fill_users_table
 
+
 if TYPE_CHECKING:
     from _pytest.main import Session
+    from tests.fixtures.database import MyDB
 
 
 @pytest.fixture(scope='class')
-def prepare_table_users(connect_postgres: MyDB):
-    fill_users_table(connect_postgres)
+def prepare_table_users(db_mydb: 'MyDB'):  # noqa F811
+    fill_users_table(db_mydb)
 
-
-@pytest.fixture(scope='session', autouse=True)
-def connect_postgres() -> MyDB:
-    """Создаем переменные окружения на компьютере.
-
-    Код не мой, но решил оставить.
-    https://www.psycopg.org/docs/usage.html#with-statement
-    """
-    try:
-        # Подключение к существующей базе данных
-        # connection = psycopg2.connect(
-        #     dbname='mydb',
-        #     user='myuser',
-        #     password='mypassword',
-        #     host='127.0.0.1',
-        #     port='5436',
-        # )
-        conn: MyDB = MyDB(psycopg2.connect(
-            dbname='mydb',
-            user='myuser',
-            password='mypassword',
-            host='127.0.0.1',
-            port='5436',
-        ))
-            # conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-        # Курсор для выполнения операций с базой данных
-        # cursor = connection.cursor()
-        # sql_create_database = 'create database postgres_db'
-        # cursor.execute(sql_create_database)
-    except (Exception, Error) as error:
-        print("Ошибка при работе с PostgreSQL", error)
-    yield conn
-    conn.close()
-    # dotenv.load_dotenv(''.join((os.path.abspath(__file__).split('api')[0], '.env.sample')))
 
 @pytest.fixture(scope='session', autouse=True)
 def create_envs():
@@ -62,7 +27,6 @@ def create_envs():
     Код не мой, но решил оставить.
     """
     dotenv.load_dotenv(''.join((os.path.abspath(__file__).split('tests')[0], '.env.sample')))
-
 
 
 @pytest.fixture(scope='session')

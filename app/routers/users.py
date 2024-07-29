@@ -1,13 +1,13 @@
 from http import HTTPStatus
-from typing import Iterable, Type, Optional
+from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi import APIRouter, HTTPException, Query
 
 from app.database import users_db
-from app.shemas.user import User, UserCreate, UserUpdate, Users
+from app.shemas.user import (User, UserCreate, UserCreateResponse, UserDeleteResponse, Users,
+                             UserUpdate)
 
 router = APIRouter(prefix="/api/users")
-
 
 
 def _calculate_total_pages(total_users: int, per_page: int) -> int:
@@ -60,10 +60,6 @@ def get_users(
     default_per_page = 6
     default_number_page = 1
     total_users = len(users_data)
-    # if type(page) is not int and 0 > page <= 100:
-    #     raise HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Invalid user page")
-    # if type(per_page) is not int and 0 > per_page <= 100:
-    #     raise HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Invalid user per_page")
     per_page: int = per_page if per_page else default_per_page
     page: int = page if page else default_number_page
     total_pages: int = _calculate_total_pages(total_users, per_page)
@@ -78,7 +74,7 @@ def get_users(
 
 
 @router.post("/", status_code=HTTPStatus.CREATED)
-def create_user(user: UserCreate) -> dict:
+def create_user(user: UserCreate) -> UserCreateResponse:
     UserCreate.model_validate(user.model_dump())
     return users_db.create_user(user)
 
@@ -87,13 +83,12 @@ def create_user(user: UserCreate) -> dict:
 def update_user(user_id: int, payload: UserUpdate) -> User:
     if user_id < 1:
         raise HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Invalid user id")
-    # request_payload: UserUpdate = UserUpdate.parse_obj(payload)
     return users_db.update_user(user_id, payload)
 
 
 @router.delete("/{user_id}", status_code=HTTPStatus.OK)
-def delete_user(user_id: int):
+def delete_user(user_id: int) -> UserDeleteResponse:
     if user_id < 1:
         raise HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail="Invalid user id")
     users_db.delete_user(user_id)
-    return {"message": "User deleted"}
+    return UserDeleteResponse(**{"message": "User deleted"})

@@ -2,7 +2,6 @@ from http import HTTPStatus
 
 import requests
 from requests import Response
-# from tests.conftest import app_url
 
 
 def test_server_is_ready(app_url: str):

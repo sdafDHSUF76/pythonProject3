@@ -1,10 +1,8 @@
 import psycopg2
 import pytest
 import structlog as structlog
-# from psycopg2 import cursor
+
 logger = structlog.get_logger('sql')
-
-
 configs_for_db = dict(
     dbname='mydb',
     user='myuser',
@@ -13,17 +11,18 @@ configs_for_db = dict(
     port='5436'
 )
 
+
 @pytest.fixture(scope='session')
 def connect() -> psycopg2:
+    """Получаем соединение к базе данных."""
     postgresql = psycopg2.connect(**configs_for_db)
     postgresql.autocommit = True  # автокомментирование после execute делает
     yield postgresql
     postgresql.close()
 
 
-
-
 class MyDB:
+    """Содержит методы, для обращения в базу данных."""
     def __init__(self, connect: psycopg2):
         self.conn = connect
 
@@ -31,12 +30,8 @@ class MyDB:
         """Get database name."""
         return self.conn.dsn.split(' ')[2].split('=')[1]
 
-    def _execute_query(self, query: str):
-        logger.info('SQL query request', db=self.get_db_name(), query=query)
-        with self.conn, self.conn.cursor() as cursor:
-            return cursor
-
     def get_value(self, query: str) -> list[tuple[str | int, ...], ...]:
+        """Получаем значения из базы данных"""
         with self.conn.cursor() as cursor:
             cursor.execute(query)
             self.conn.commit()
@@ -55,28 +50,24 @@ class MyDB:
                     data.update({col[0]: unit_of_data_received[id]})
                 result.append(data.copy())
                 data.clear()
-
-
             logger.info('SQL result', db=self.get_db_name(), query=query, result=result)
             return result
 
     def execute(self, query: str) -> None:
+        """Выполнить определенный запрос, например Insert, Update,...все что кроме select."""
         with self.conn.cursor() as cursor:
             cursor.execute(query)
             self.conn.commit()
             logger.info('SQL result', db=self.get_db_name(), query=query)
-            # self.conn.close()
-            # return result
-        # self._execute_query(query)
-
-
 
     def close(self) -> None:
+        """Закрыть подключение к базе данных."""
         self.conn.close()
 
 
 @pytest.fixture(scope='session')
 def db_mydb(connect: psycopg2) -> MyDB:
+    """Получаем доступ к базе данных, чтобы делать в ней запросы."""
     mydb: MyDB = MyDB(connect)
     yield mydb
     mydb.close()

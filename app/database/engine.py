@@ -1,8 +1,5 @@
-import os
-
-from sqlalchemy import create_engine, Engine
-# from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import DeclarativeBase, sessionmaker
+from sqlalchemy import Engine, create_engine
+from sqlalchemy.orm import DeclarativeBase
 
 DB_HOST = '127.0.0.1'
 DB_PORT = 5436
@@ -11,12 +8,11 @@ DB_PASS = 'mypassword'
 DB_NAME = 'mydb'
 
 DATABASE_URL = f'postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
-# pool_size = str(os.getenv("DATABASE_POOL_SIZE", 11))
-engine: Engine = create_engine(DATABASE_URL)
-
-# sync_session_maker = sessionmaker(engine, expire_on_commit=False)
+engine: Engine = create_engine(
+    DATABASE_URL,
+    # pool_size=os.getenv("DATABASE_POOL_SIZE", 10)
+)
 
 
 class Base(DeclarativeBase):
     pass
-

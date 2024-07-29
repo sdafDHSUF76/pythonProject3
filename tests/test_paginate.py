@@ -9,11 +9,10 @@ from requests import Response
 from app.shemas.error_list import ErrorParams
 from app.shemas.user import Users
 from tests.fixtures.database import MyDB, configs_for_db
-from tests.utils import fill_users_table, calculate_pages
+from tests.utils import calculate_pages, fill_users_table
 
 if TYPE_CHECKING:
     from _pytest.python import Metafunc
-    from _pytest.main import Session
 
 
 prepare_users = False
@@ -23,13 +22,12 @@ new_data_page_and_size: list
 @pytest.mark.usefixtures('prepare_table_users')
 class TestsPaginate:
 
-
     def pytest_generate_tests(self, metafunc: 'Metafunc'):
         """Добавил параметризацию в тесты.
 
         Пришлось сделать ее динамической, так как тестовые данные, могут быть разного количества, но
-        тут сильно не продумывал логику, сделал пока набросок, но суть здесь, в том, чтобы динамически
-        подстраивать параметризацию от количества данных в users.json
+        тут сильно не продумывал логику, сделал пока набросок, но суть здесь, в том, чтобы
+        динамически подстраивать параметризацию от количества данных в базе данных
         """
         global prepare_users
         global new_data_page_and_size
@@ -66,24 +64,7 @@ class TestsPaginate:
                 (3, 2, (users[3]['id'], users[4]['id'], users[5]['id'])),
                 (5, 3, (users[10]['id'], users[11]['id'])),
             ]
-        # a: psycopg2._psycopg.connection = psycopg2.connect(
-        #         dbname='mydb',
-        #         user='myuser',
-        #         password='mypassword',
-        #         host='127.0.0.1',
-        #         port='5436',
-        # )
-        # a.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-        # cursor = a.cursor()
-        #
-        # pass
-        # cursor.execute('select id from users where id = 1')
-        # # c = a.commit().fetchall()
-        # c = cursor.fetchall()
-        # with open(''.join((os.path.abspath(__file__).split('api')[0], 'users.json'))) as f:
-        #     users = json.load(f)
         if 'page_and_size_parametrize' in metafunc.fixturenames:
-            # Generate test cases based on the user_roles list
             metafunc.parametrize('page_and_size_parametrize', new_data_page_and_size)
 
         if 'data_page' in metafunc.fixturenames:
@@ -94,7 +75,6 @@ class TestsPaginate:
 
         if 'different_page' in metafunc.fixturenames:
             metafunc.parametrize('different_page', set(new_data_size_page_expected_page))
-
 
     @pytest.mark.parametrize(
         "page, size",
@@ -113,7 +93,6 @@ class TestsPaginate:
         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
         ErrorParams.model_validate(response.json())
 
-
     def test_users_correct_values_page_and_size(
         self, app_url: str, page_and_size_parametrize: tuple[int, int, int, int],
     ):
@@ -126,7 +105,6 @@ class TestsPaginate:
         assert response_payload['page'] == page
         assert response_payload['per_page'] == size
         assert response_payload['total_pages'] == calculate_pages(total_users, size)
-
 
     def test_users_different_users_depending_on_page(
         self, app_url: str, different_page: tuple[int, int, tuple[int, ...]],
@@ -147,26 +125,26 @@ class TestsPaginate:
                 f'current_user_id: {user_id}, expected_id_users: {expected_id_users[id]}'
             )
 
-
-    @pytest.mark.parametrize("page", [-1, 0, "fafaf", "@/*$%^&#*/()?>,.*/\"", 99999999, 'None', 1.5])
+    @pytest.mark.parametrize(
+        "page", [-1, 0, "fafaf", "@/*$%^&#*/()?>,.*/\"", 99999999, 'None', 1.5],
+    )
     def test_users_invalid_page(self, app_url: str, page: int | str | float):
         response: Response = requests.get(f"{app_url}/api/users/?page={page}")
         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
         ErrorParams.model_validate(response.json())
 
-
-    @pytest.mark.parametrize("size", [-1, 0, "fafaf", "@/*$%^&#*/()?>,.*/\"", 99999999, 'None', 1.5])
+    @pytest.mark.parametrize(
+        "size", [-1, 0, "fafaf", "@/*$%^&#*/()?>,.*/\"", 99999999, 'None', 1.5],
+    )
     def test_users_invalid_size(self, app_url: str, size: int | str | float):
         response: Response = requests.get(f"{app_url}/api/users/?per_page={size}")
         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
         ErrorParams.model_validate(response.json())
 
-
     def test_users_page(self, app_url: str, data_page: int):
         response: Response = requests.get(f"{app_url}/api/users/?page={data_page}")
         assert response.status_code == HTTPStatus.OK
         Users.model_validate(response.json())
-
 
     def test_users_size(self, app_url: str, data_size: int):
         response: Response = requests.get(f"{app_url}/api/users/?per_page={data_size}")

@@ -16,6 +16,7 @@ def calculate_pages(total: int, size: int) -> int:
 
 
 def fill_users_table(connect_postgres: 'MyDB') -> None:
+    """Заполняем базу данных нужными записями."""
     connect_postgres.execute(
         'TRUNCATE users;\n'
         'ALTER SEQUENCE users_id_seq RESTART WITH 1;\n'

@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 
 from app.database.engine import engine
 
-
 router = APIRouter()
 
 
@@ -19,5 +18,5 @@ def status(response: Response):
     try:
         with Session(engine) as session:
             session.execute(text('SELECT 1'))
-    except Exception: # TODO нужно поправить, чтобы перехватывал конкретную ошибку
+    except Exception:
         response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
