@@ -5,17 +5,17 @@ import structlog as structlog
 logger = structlog.get_logger('sql')
 
 
-
+configs_for_db = dict(
+    dbname='mydb',
+    user='myuser',
+    password='mypassword',
+    host='127.0.0.1',
+    port='5436'
+)
 
 @pytest.fixture(scope='session')
 def connect() -> psycopg2:
-    postgresql = psycopg2.connect(
-        dbname='mydb',
-        user='myuser',
-        password='mypassword',
-        host='127.0.0.1',
-        port='5436',
-    )
+    postgresql = psycopg2.connect(**configs_for_db)
     postgresql.autocommit = True  # автокомментирование после execute делает
     yield postgresql
     postgresql.close()

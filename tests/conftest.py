@@ -10,9 +10,15 @@ from psycopg2 import Error
 
 from tests.fixtures.database import MyDB
 from tests.test_smoke import test_server_is_ready
+from tests.utils import fill_users_table
 
 if TYPE_CHECKING:
     from _pytest.main import Session
+
+
+@pytest.fixture(scope='class')
+def prepare_table_users(connect_postgres: MyDB):
+    fill_users_table(connect_postgres)
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -55,7 +61,6 @@ def create_envs():
 
     Код не мой, но решил оставить.
     """
-    print(2222222222222222222222)
     dotenv.load_dotenv(''.join((os.path.abspath(__file__).split('tests')[0], '.env.sample')))
 
 
@@ -66,7 +71,6 @@ def app_url() -> str:
 
     Код не мой, но решил оставить как есть.
     """
-    print(111111111111111111111)
     return os.getenv("APP_URL")
 
 
@@ -80,7 +84,7 @@ def pytest_collection_modifyitems(items: list[Function]):
         if item.originalname == 'test_server_is_ready':
             return
     new_test: Function = pytest.Function.from_parent(
-        parent=items[0].parent,
+        parent=items[0].parent.parent,
         name=test_server_is_ready.__name__,
         callobj=test_server_is_ready
     )
