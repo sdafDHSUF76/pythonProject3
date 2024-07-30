@@ -38,9 +38,8 @@ class MyDB:
         """Получаем значения из базы данных"""
         with self.conn.cursor() as cursor:
             cursor.execute(query)
-            self.conn.commit()
             result = cursor.fetchall()
-            logger.info('SQL result', db=self.get_db_name(), query=query, result=result)
+            logger.info('SQL result', database=self.get_db_name(), query=query, sql_result=result)
             return result
 
     def get_answer_in_form_of_dictionary(self, query: str) -> list[dict]:
@@ -54,7 +53,7 @@ class MyDB:
                     data.update({col[0]: unit_of_data_received[id]})
                 result.append(data.copy())
                 data.clear()
-            logger.info('SQL result', db=self.get_db_name(), query=query, result=result)
+            logger.info('SQL result', database=self.get_db_name(), query=query, sql_result=result)
             return result
 
     def execute(self, query: str) -> None:
@@ -62,7 +61,7 @@ class MyDB:
         with self.conn.cursor() as cursor:
             cursor.execute(query)
             self.conn.commit()
-            logger.info('SQL result', db=self.get_db_name(), query=query)
+            logger.info('SQL result', database=self.get_db_name(), query=query)
 
     def close(self) -> None:
         """Закрыть подключение к базе данных."""
