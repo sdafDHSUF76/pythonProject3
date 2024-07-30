@@ -50,7 +50,7 @@ class TestsApi:
         User.model_validate(response.json())
         assert db_mydb.get_value('select first_name from users where id = 1')[0][0] == '1234'
 
-    def test_update_not_cuh_user(self, app_url: str):
+    def test_update_non_existent_user(self, app_url: str):
         response: Response = requests.patch(
             f"{app_url}/api/users/25",
             json={'first_name': '1234'}
@@ -58,10 +58,25 @@ class TestsApi:
         assert response.status_code == HTTPStatus.NOT_FOUND
         assert response.json() == {'detail': 'User not found'}
 
-    def test_update_not_correct_payload(self, app_url: str):
+    def test_update_without_payload(self, app_url: str):
         response: Response = requests.patch(
             f"{app_url}/api/users/1",
-            json={'first_name': 1234}
+        )
+        assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+        ErrorParams.model_validate(response.json())
+
+    @pytest.mark.parametrize(
+        "incorrect_field_in_payload", [
+            pytest.param({"avatar": "//reqres.in/img/faces/1-image.jpg"}, id='incorrect avatar'),
+            pytest.param({"email": "george.bluthreqres.in"}, id='incorrect email'),
+            pytest.param({"first_name": 1}, id='incorrect first_name'),
+            pytest.param({"last_name": 1}, id='incorrect last_name'),
+        ],
+    )
+    def test_update_with_incorrect_payload(self, app_url: str, incorrect_field_in_payload: dict):
+        response: Response = requests.patch(
+            f"{app_url}/api/users/1",
+            json=incorrect_field_in_payload
         )
         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
         ErrorParams.model_validate(response.json())
@@ -81,28 +96,24 @@ class TestsApi:
             f'select first_name from users where id = {response.json()["id"]}',
         )[0][0] == "11111111morph2e56s"
 
-    def test_post_not_correct_email(self, app_url: str):
+    @pytest.mark.parametrize(
+        "incorrect_field_in_payload", [
+            pytest.param({"avatar": "//reqres.in/img/faces/1-image.jpg"}, id='incorrect avatar'),
+            pytest.param({"email": "george.bluthreqres.in"}, id='incorrect email'),
+            pytest.param({"first_name": 1}, id='incorrect first_name'),
+            pytest.param({"last_name": 1}, id='incorrect last_name'),
+        ],
+    )
+    def test_post_with_incorrect_payload(self, app_url: str, incorrect_field_in_payload: dict):
+        payload_template= {
+            "email": "george.bluth@reqres.in",
+            "first_name": "11111111morph2e56s",
+            "last_name": "Bluth",
+            "avatar": "http://reqres.in/img/faces/1-image.jpg"
+        }
         response: Response = requests.post(
             f"{app_url}/api/users/",
-            json={
-                "email": "george.bluthreqres.in",
-                "first_name": "11111111morph2e56s",
-                "last_name": "Bluth",
-                "avatar": "https://reqres.in/img/faces/1-image.jpg"
-            }
-        )
-        assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
-        ErrorParams.model_validate(response.json())
-
-    def test_post_not_correct_avatar(self, app_url: str):
-        response: Response = requests.post(
-            f"{app_url}/api/users/",
-            json={
-                "email": "george.bluth@reqres.in",
-                "first_name": "11111111morph2e56s",
-                "last_name": "Bluth",
-                "avatar": "//reqres.in/img/faces/1-image.jpg"
-            }
+            json=payload_template.update(incorrect_field_in_payload)
         )
         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
         ErrorParams.model_validate(response.json())
@@ -115,7 +126,7 @@ class TestsApi:
         assert response.json() == {"message": "User deleted"}
         assert not len(db_mydb.get_value('select first_name from users where id = 1'))
 
-    def test_delete_not_user(self, app_url: str, db_mydb: 'MyDB'):
+    def test_delete_non_existent_user(self, app_url: str, db_mydb: 'MyDB'):
         response: Response = requests.delete(
             f"{app_url}/api/users/21",
         )
@@ -125,7 +136,7 @@ class TestsApi:
         }
         assert not len(db_mydb.get_value('select first_name from users where id = 21'))
 
-    def test_delete_not_found(self, app_url: str, db_mydb: 'MyDB'):
+    def test_delete_deleted_user(self, app_url: str, db_mydb: 'MyDB'):
         requests.delete(
             f"{app_url}/api/users/2",
         )

@@ -13,6 +13,13 @@ class Ctx(BaseModel):
     error: Optional[dict] = {}
 
 
+class Error(BaseModel):
+
+    model_config = ConfigDict(extra='forbid')
+
+    error: str
+
+
 class ErrorParam(BaseModel):
 
     model_config = ConfigDict(extra='forbid')
@@ -20,8 +27,8 @@ class ErrorParam(BaseModel):
     type: str
     loc: list[str]
     msg: str
-    input: str | int
-    ctx: Optional[Ctx] = None
+    input: Optional[str | int]
+    ctx: Optional[Ctx] | Error = None
 
 
 class ErrorParams(BaseModel):
