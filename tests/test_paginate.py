@@ -65,16 +65,44 @@ class TestsPaginate:
                 (5, 3, (users[10]['id'], users[11]['id'])),
             ]
         if 'page_and_size_parametrize' in metafunc.fixturenames:
-            metafunc.parametrize('page_and_size_parametrize', new_data_page_and_size)
+            metafunc.parametrize(
+                'page_and_size_parametrize',
+                new_data_page_and_size,
+                ids=[
+                    str(i)[1:-1].replace(', ', '-')
+                    for i in new_data_page_and_size
+                ]
+            )
 
         if 'data_page' in metafunc.fixturenames:
-            metafunc.parametrize('data_page', set(new_data_page))
+            metafunc.parametrize(
+                'data_page',
+                set(new_data_page),
+                ids=[
+                    str(i)[1:-1].replace(', ', '-')
+                    for i in set(new_data_page)
+                ]
+            )
 
         if 'data_size' in metafunc.fixturenames:
-            metafunc.parametrize('data_size', set(new_data_size))
+            metafunc.parametrize(
+                'data_size',
+                set(new_data_size),
+                ids=[
+                    str(i)[1:-1].replace(', ', '-')
+                    for i in set(new_data_size)
+                ]
+            )
 
         if 'different_page' in metafunc.fixturenames:
-            metafunc.parametrize('different_page', set(new_data_size_page_expected_page))
+            metafunc.parametrize(
+                'different_page',
+                set(new_data_size_page_expected_page),
+                ids=[
+                    str(i)[1:-1].replace(', ', '-', 2)
+                    for i in set(new_data_size_page_expected_page)
+                ]
+            )
 
     @pytest.mark.parametrize(
         "page, size",

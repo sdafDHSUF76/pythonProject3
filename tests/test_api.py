@@ -113,7 +113,6 @@ class TestsApi:
         )
         assert response.status_code == HTTPStatus.OK
         assert response.json() == {"message": "User deleted"}
-        # response_payload: dict = User.parse_obj().dict()
         assert not len(db_mydb.get_value('select first_name from users where id = 1'))
 
     def test_delete_not_user(self, app_url: str, db_mydb: 'MyDB'):
@@ -124,7 +123,6 @@ class TestsApi:
         assert response.json() == {
             "detail": "User not found"
         }
-        # response_payload: dict = User.parse_obj().dict()
         assert not len(db_mydb.get_value('select first_name from users where id = 21'))
 
     def test_delete_not_found(self, app_url: str, db_mydb: 'MyDB'):
