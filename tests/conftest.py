@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture(scope='class')
-def prepare_table_users(db_mydb: 'MyDB'):  # noqa F811
+def prepare_table_users(db_mydb: 'MyDB'):
     fill_users_table(db_mydb)
 
 
