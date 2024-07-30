@@ -4,8 +4,14 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Query
 
 from app.database import users_db
-from app.shemas.user import (User, UserCreate, UserCreateResponse, UserDeleteResponse, Users,
-                             UserUpdate)
+from app.shemas.user import (
+    User,
+    UserCreate,
+    UserCreateResponse,
+    UserDeleteResponse,
+    Users,
+    UserUpdate,
+)
 
 router = APIRouter(prefix="/api/users")
 
@@ -26,7 +32,7 @@ def _get_start_and_end_index(page: int, per_page: int) -> (int, int):
 
 
 def _get_users_on_page(
-    page: int,  per_page: int, total_pages: int, users_data: list[User],
+    page: int, per_page: int, total_pages: int, users_data: list[User],
 ) -> list | list[dict]:
     """Получаем данные сущностей на странице по нашим page, и total_pages.
 
