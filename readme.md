@@ -44,12 +44,17 @@ alembic upgrade head
 
 **Запуск**
 
-python -m  uvicorn --app-dir  ./app main:app --reload --host=127.0.0.1 --port=8002
 Чтобы запустить сервис, выполните команду:
 ```bash
 python -m  uvicorn  app.main:app --reload --host=127.0.0.1 --port=8002
 ```
-Проверялся запуск на windows, как на других ОС, как работает не проверял
+Проверялся запуск на windows, как на других ОС, как работает не проверял.
+
+Eсли команда выше не сработала, то попробуйте эту
+```bash
+python -m  uvicorn --app-dir  ./app main:app --reload --host=127.0.0.1 --port=8002
+```
+
 
 **Тестирование**
 
