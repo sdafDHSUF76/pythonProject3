@@ -73,3 +73,11 @@ class UserUpdate(BaseModel):
     first_name: str | None = None
     last_name: str | None = None
     avatar: HttpUrl | None = None
+
+    @field_validator("avatar")
+    def get_url_str(cls, value):
+        """Сделал этот метод, чтобы avatar приходил в виде str, а не объекта Url.
+
+        База данных падает если приходит Url, а не str.
+        """
+        return str(value)

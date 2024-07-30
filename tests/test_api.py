@@ -41,7 +41,7 @@ class TestsApi:
         assert response.status_code == HTTPStatus.OK
         Users.model_validate(response.json())
 
-    def test_update(self, app_url: str, db_mydb: 'MyDB'):
+    def test_update_one_field_payload(self, app_url: str, db_mydb: 'MyDB'):
         response: Response = requests.patch(
             f"{app_url}/api/users/1",
             json={'first_name': '1234'}
@@ -49,6 +49,23 @@ class TestsApi:
         assert response.status_code == HTTPStatus.OK
         User.model_validate(response.json())
         assert db_mydb.get_value('select first_name from users where id = 1')[0][0] == '1234'
+
+    def test_update_all_fields(self, app_url: str, db_mydb: 'MyDB'):
+        payload_template= {
+            "email": "george.bluth@reqres.in",
+            "first_name": "11111111morph2e56s",
+            "last_name": "Bluth",
+            "avatar": "http://reqres.in/img/faces/1-image.jpg"
+        }
+        response: Response = requests.patch(
+            f"{app_url}/api/users/1",
+            json=payload_template
+        )
+        assert response.status_code == HTTPStatus.OK
+        User.model_validate(response.json())
+        assert db_mydb.get_answer_in_form_of_dictionary(
+            'select email, first_name, last_name, avatar from users where id = 1'
+        )[0] == payload_template
 
     def test_update_non_existent_user(self, app_url: str):
         response: Response = requests.patch(
@@ -71,6 +88,7 @@ class TestsApi:
             pytest.param({"email": "george.bluthreqres.in"}, id='incorrect email'),
             pytest.param({"first_name": 1}, id='incorrect first_name'),
             pytest.param({"last_name": 1}, id='incorrect last_name'),
+            pytest.param({"1last_name": 1}, id='unsupported field 1last_name'),
         ],
     )
     def test_update_with_incorrect_payload(self, app_url: str, incorrect_field_in_payload: dict):
@@ -102,6 +120,7 @@ class TestsApi:
             pytest.param({"email": "george.bluthreqres.in"}, id='incorrect email'),
             pytest.param({"first_name": 1}, id='incorrect first_name'),
             pytest.param({"last_name": 1}, id='incorrect last_name'),
+            pytest.param({"1last_name": 1}, id='unsupported field 1last_name'),
         ],
     )
     def test_post_with_incorrect_payload(self, app_url: str, incorrect_field_in_payload: dict):
@@ -116,6 +135,39 @@ class TestsApi:
             json=payload_template.update(incorrect_field_in_payload)
         )
         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+        ErrorParams.model_validate(response.json())
+
+    def test_post_without_required_field(self, app_url: str):
+        response: Response = requests.post(
+            f"{app_url}/api/users/",
+            json={
+                "first_name": "11111111morph2e56s",
+                "last_name": "Bluth",
+                "avatar": "http://reqres.in/img/faces/1-image.jpg"
+            }
+        )
+        assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+        ErrorParams.model_validate(response.json())
+
+    def test_post_without_payload(self, app_url: str):
+        response: Response = requests.post(
+            f"{app_url}/api/users/",
+        )
+        assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+        ErrorParams.model_validate(response.json())
+
+    def test_post_incorrect_path_in_url(self, app_url: str):
+        response: Response = requests.post(
+            f"{app_url}/api/users/1",
+        )
+        assert response.status_code == HTTPStatus.METHOD_NOT_ALLOWED
+        ErrorParams.model_validate(response.json())
+
+    def test_delete_incorrect_path_in_url(self, app_url: str):
+        response: Response = requests.delete(
+            f"{app_url}/api/users/",
+        )
+        assert response.status_code == HTTPStatus.METHOD_NOT_ALLOWED
         ErrorParams.model_validate(response.json())
 
     def test_delete(self, app_url: str, db_mydb: 'MyDB'):

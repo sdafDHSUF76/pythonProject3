@@ -27,7 +27,7 @@ class ErrorParam(BaseModel):
     type: str
     loc: list[str]
     msg: str
-    input: Optional[str | int]
+    input: Optional[str | int | dict]
     ctx: Optional[Ctx] | Error = None
 
 
@@ -35,4 +35,4 @@ class ErrorParams(BaseModel):
 
     model_config = ConfigDict(extra='forbid')
 
-    detail: list[ErrorParam]
+    detail: list[ErrorParam] | str
