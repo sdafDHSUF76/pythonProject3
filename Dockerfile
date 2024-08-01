@@ -9,6 +9,7 @@ ENV HOST_DB=host.docker.internal
 COPY ./app /code/app
 COPY alembic.ini /code/
 COPY .env.sample /code/
+#COPY .env.docker /code/
 RUN cd app
 RUN alembic upgrade head
 

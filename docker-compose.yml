@@ -5,11 +5,6 @@ services:
 
   app:
     build: .
-    environment:
-      DB_NAME: ${DB_NAME}
-      USER_NAME: ${USER_NAME}
-      PASSWORD_FOR_DB: ${PASSWORD_FOR_DB}
-      PORT_DB: ${PORT_DB}
     ports:
       - 8002:80
     depends_on:
