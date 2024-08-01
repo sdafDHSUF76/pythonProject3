@@ -1,14 +1,15 @@
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 
-import psycopg2
 import pytest
 import requests
 from requests import Response
+from sqlalchemy import create_engine
 
 from app.shemas.error_list import ErrorParams
 from app.shemas.user import Users
-from tests.fixtures.database import MyDB, configs_for_db, connect, db_mydb  # noqa F401
+from tests.fixtures.database import DATABASE_URL  # noqa F401
+from tests.fixtures.database import MyDB, connect  # noqa F401
 from tests.utils import calculate_pages, fill_users_table
 
 if TYPE_CHECKING:
@@ -35,7 +36,12 @@ class TestsPaginate:
         global new_data_size
         global new_data_size_page_expected_page
         if not prepare_users:
-            connect_db: MyDB = MyDB(psycopg2.connect(**configs_for_db))
+            connect_db: MyDB = MyDB(
+                create_engine(
+                    DATABASE_URL,
+                    # pool_size=os.getenv("DATABASE_POOL_SIZE", 10)
+                ).connect(),
+            )
             fill_users_table(connect_db)
             prepare_users = True
             count_users: int = connect_db.get_value('select count(id) from users')[0][0]
