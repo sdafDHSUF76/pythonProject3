@@ -5,8 +5,15 @@ services:
 
   app:
     build: .
+    environment:
+      DB_NAME: ${DB_NAME}
+      USER_NAME: ${USER_NAME}
+      PASSWORD_FOR_DB: ${PASSWORD_FOR_DB}
+      PORT_DB: 5432
+      HOST_DB: db
     ports:
       - 8002:80
+    command: bash -c "alembic upgrade head && fastapi run app/main.py --port 80"
     depends_on:
       - db
 
