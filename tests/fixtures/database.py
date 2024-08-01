@@ -8,7 +8,7 @@ import structlog as structlog
 from sqlalchemy import Connection, Row, create_engine, text
 from sqlalchemy.orm import Session
 
-dotenv.load_dotenv(''.join((os.path.abspath(__file__).split('tests')[0], '.env.sample')))
+dotenv.load_dotenv(''.join((os.path.abspath(__file__).split('tests')[0], '.env.docker')))
 logger = structlog.get_logger('sql')
 
 DB_HOST = os.getenv('HOST_DB_IN_DOCKER')

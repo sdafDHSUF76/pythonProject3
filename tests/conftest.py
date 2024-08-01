@@ -26,7 +26,7 @@ def create_envs():
 
     Код не мой, но решил оставить.
     """
-    dotenv.load_dotenv(''.join((os.path.abspath(__file__).split('tests')[0], '.env.sample')))
+    dotenv.load_dotenv(''.join((os.path.abspath(__file__).split('tests')[0], '.env.docker')))
 
 
 @pytest.fixture(scope='session')
