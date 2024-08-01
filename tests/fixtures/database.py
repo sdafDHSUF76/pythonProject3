@@ -10,15 +10,8 @@ from sqlalchemy.orm import Session
 
 dotenv.load_dotenv(''.join((os.path.abspath(__file__).split('tests')[0], '.env.sample')))
 logger = structlog.get_logger('sql')
-configs_for_db = dict(
-    dbname=os.getenv('DB_NAME'),
-    user=os.getenv('USER_NAME'),
-    password=os.getenv('PASSWORD_FOR_DB'),
-    host=os.getenv('HOST_DB'),
-    port=os.getenv('PORT_DB')
-)
 
-DB_HOST = os.getenv('HOST_DB')
+DB_HOST = os.getenv('HOST_DB_IN_DOCKER')
 DB_PORT = os.getenv('PORT_DB')
 DB_USER = os.getenv('USER_NAME')
 DB_PASS = os.getenv('PASSWORD_FOR_DB')
