@@ -29,13 +29,13 @@ services:
     #    tmpfs:
     #      size: 134217728 # 128*2^20 bytes = 128Mb
     environment:
-      POSTGRES_DB: mydb
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${USER_NAME}
+      POSTGRES_PASSWORD: ${PASSWORD_FOR_DB}
     volumes:
       - db-data:/var/lib/postgresql/data
     ports:
-      - 5436:5432
+      - ${PORT_DB}:5432
 
 volumes:
   db-data:

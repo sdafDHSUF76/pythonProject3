@@ -2,9 +2,9 @@ FROM python:3.10
 
 WORKDIR /code
 
-COPY ./requirements.txt /code/requirements.txt
+COPY ./docker_requirements.txt /code/docker_requirements.txt
 
-RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /code/docker_requirements.txt
 #ENV HOST_DB=host.docker.internal
 COPY ./app /code/app
 COPY alembic.ini /code/

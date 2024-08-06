@@ -1,0 +1,9 @@
+FROM python:3.10
+
+
+
+COPY ./tests_requirements.txt /code/tests_requirements.txt
+
+RUN pip install --no-cache-dir --upgrade -r /code/tests_requirements.txt
+COPY ./tests/ /tests
+COPY ./app/shemas /app/shemas
