@@ -1,0 +1,41 @@
+# Use postgres/example user/password credentials
+version: '3.9'
+
+services:
+
+  app:
+    build: .
+    environment:
+      DB_NAME: ${DB_NAME}
+      USER_NAME: ${USER_NAME}
+      PASSWORD_FOR_DB: ${PASSWORD_FOR_DB}
+      PORT_DB: 5432
+      HOST_DB: db
+    ports:
+      - 8002:80
+    command: bash -c "printenv && alembic upgrade head && fastapi run app/main.py --port 80"
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16
+    restart: always
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+    # or set shared memory limit when deploy via swarm stack
+    #volumes:
+    #  - type: tmpfs
+    #    target: /dev/shm
+    #    tmpfs:
+    #      size: 134217728 # 128*2^20 bytes = 128Mb
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${USER_NAME}
+      POSTGRES_PASSWORD: ${PASSWORD_FOR_DB}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - ${PORT_DB}:5432
+
+volumes:
+  db-data:

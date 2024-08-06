@@ -1,0 +1,21 @@
+# Use postgres/example user/password credentials
+version: '3.9'
+
+services:
+
+  tests:
+    build:
+      dockerfile: Dockerfile.tests
+    environment:
+      DB_NAME: ${DB_NAME}
+      USER_NAME: ${USER_NAME}
+      PASSWORD_FOR_DB: ${PASSWORD_FOR_DB}
+      PORT_DB: ${PORT_DB}
+      APP_URL: ${APP_URL}
+      HOST_DB_IN_DOCKER: ${HOST_DB_IN_DOCKER}
+    network_mode: "host"
+    command: bash -c "pytest ./tests/ -v"
+
+networks:
+    shared-network:
+      external: true
