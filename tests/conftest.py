@@ -1,7 +1,5 @@
-import os
 from typing import TYPE_CHECKING
 
-import dotenv
 import pytest
 from _pytest.python import Function
 
@@ -12,6 +10,8 @@ from tests.utils import fill_users_table
 
 if TYPE_CHECKING:
     from _pytest.main import Session
+    from _pytest.config import Parser
+    from _pytest.fixtures import SubRequest
 
     from tests.fixtures.database import MyDB
 
@@ -22,7 +22,7 @@ def prepare_table_users(db_mydb: 'MyDB'):
 
 
 @pytest.fixture(scope='session')
-def env(request) -> str:
+def env(request: 'SubRequest') -> str:
     """Создаем переменные окружения на компьютере.
 
     Код не мой, но решил оставить.
@@ -30,7 +30,7 @@ def env(request) -> str:
     return request.config.getoption('--env')
 
 
-def pytest_addoption(parser):
+def pytest_addoption(parser: 'Parser'):
     parser.addoption('--env', default='test')
 
 

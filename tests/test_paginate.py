@@ -2,7 +2,6 @@ from http import HTTPStatus
 from typing import TYPE_CHECKING
 
 import pytest
-import requests
 from requests import Response
 from sqlalchemy import create_engine
 
@@ -14,6 +13,8 @@ from tests.utils import calculate_pages, fill_users_table
 
 if TYPE_CHECKING:
     from _pytest.python import Metafunc
+
+    from tests.microservice_api import MicroserviceApi
 
 
 prepare_users = False
@@ -122,16 +123,20 @@ class TestsPaginate:
             ('None', 'None'),
         ],
     )
-    def test_users_invalid_page_and_size(self, app_url: str, page: int | str, size: int | str):
-        response: Response = requests.get(f"{app_url}/api/users/?page={page}&size={size}")
+    def test_users_invalid_page_and_size(
+        self, microservice_api: 'MicroserviceApi', page: int | str, size: int | str,
+    ):
+        response: Response = microservice_api.get_users(page, size)
         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
         ErrorParams.model_validate(response.json())
 
     def test_users_correct_values_page_and_size(
-        self, app_url: str, page_and_size_parametrize: tuple[int, int, int, int],
+        self,
+        microservice_api: 'MicroserviceApi',
+        page_and_size_parametrize: tuple[int, int, int, int],
     ):
         page, size, expected_count_user, total_users = page_and_size_parametrize
-        response: Response = requests.get(f"{app_url}/api/users/?page={page}&per_page={size}")
+        response: Response = microservice_api.get_users(page, size)
         assert response.status_code == HTTPStatus.OK
         response_payload: dict = Users.model_validate(response.json()).model_dump()
         assert len(response_payload['data']) == expected_count_user
@@ -141,10 +146,10 @@ class TestsPaginate:
         assert response_payload['total_pages'] == calculate_pages(total_users, size)
 
     def test_users_different_users_depending_on_page(
-        self, app_url: str, different_page: tuple[int, int, tuple[int, ...]],
+        self, microservice_api: 'MicroserviceApi', different_page: tuple[int, int, tuple[int, ...]],
     ):
         size, page, expected_id_users = different_page
-        response: Response = requests.get(f"{app_url}/api/users/?page={page}&per_page={size}")
+        response: Response = microservice_api.get_users(page, size)
         assert response.status_code == HTTPStatus.OK
         response_payload: dict = Users.model_validate(response.json()).model_dump()
         current_user_id = [
@@ -162,25 +167,25 @@ class TestsPaginate:
     @pytest.mark.parametrize(
         "page", [-1, 0, "fafaf", "@/*$%^&#*/()?>,.*/\"", 99999999, 'None', 1.5],
     )
-    def test_users_invalid_page(self, app_url: str, page: int | str | float):
-        response: Response = requests.get(f"{app_url}/api/users/?page={page}")
+    def test_users_invalid_page(self, microservice_api: 'MicroserviceApi', page: int | str | float):
+        response: Response = microservice_api.get_users(page)
         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
         ErrorParams.model_validate(response.json())
 
     @pytest.mark.parametrize(
         "size", [-1, 0, "fafaf", "@/*$%^&#*/()?>,.*/\"", 99999999, 'None', 1.5],
     )
-    def test_users_invalid_size(self, app_url: str, size: int | str | float):
-        response: Response = requests.get(f"{app_url}/api/users/?per_page={size}")
+    def test_users_invalid_size(self, microservice_api: 'MicroserviceApi', size: int | str | float):
+        response: Response = microservice_api.get_users(per_page=size)
         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
         ErrorParams.model_validate(response.json())
 
-    def test_users_page(self, app_url: str, data_page: int):
-        response: Response = requests.get(f"{app_url}/api/users/?page={data_page}")
+    def test_users_page(self, microservice_api: 'MicroserviceApi', data_page: int):
+        response: Response = microservice_api.get_users(data_page)
         assert response.status_code == HTTPStatus.OK
         Users.model_validate(response.json())
 
-    def test_users_size(self, app_url: str, data_size: int):
-        response: Response = requests.get(f"{app_url}/api/users/?per_page={data_size}")
+    def test_users_size(self, microservice_api: 'MicroserviceApi', data_size: int):
+        response: Response = microservice_api.get_users(per_page=data_size)
         assert response.status_code == HTTPStatus.OK
         Users.model_validate(response.json())

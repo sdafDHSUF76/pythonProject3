@@ -3,16 +3,15 @@ from typing import TYPE_CHECKING
 
 import faker as faker
 import pytest
-import requests
 from requests import Response
 
 from app.shemas.error_list import ErrorParams
-from app.shemas.user import User, Users, UserUpdate, UserCreate
+from app.shemas.user import User, UserCreate, Users, UserUpdate
 from tests.fixtures.database import connect, db_mydb  # noqa F401
 
 if TYPE_CHECKING:
-    from tests.microservice_api import MicroserviceApi
     from tests.fixtures.database import MyDB
+    from tests.microservice_api import MicroserviceApi
 
 
 @pytest.mark.usefixtures('prepare_table_users')
@@ -153,7 +152,7 @@ class TestsApi:
         self, microservice_api: 'MicroserviceApi', incorrect_field_in_payload: dict,
     ):
         response: Response = microservice_api.update_user(
-            1, UserUpdate(**incorrect_field_in_payload),
+            1, incorrect_field_in_payload,
         )
         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
         ErrorParams.model_validate(response.json())
@@ -207,26 +206,26 @@ class TestsApi:
             "avatar": "http://reqres.in/img/faces/1-image.jpg"
         }
         new_payload: dict = payload_template.update(incorrect_field_in_payload)
-        response: Response = microservice_api.create_user(UserCreate(**new_payload))
+        response: Response = microservice_api.create_user(new_payload)
         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
         ErrorParams.model_validate(response.json())
 
     def test_post_without_required_field(self, microservice_api: 'MicroserviceApi'):
-        response: Response = microservice_api.create_user(UserCreate(**{
+        response: Response = microservice_api.create_user({
             "first_name": "11111111morph2e56s",
             "last_name": "Bluth",
             "avatar": "http://reqres.in/img/faces/1-image.jpg"
-        }))
+        })
         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
         ErrorParams.model_validate(response.json())
 
     def test_post_without_payload(self, microservice_api: 'MicroserviceApi'):
-        response: Response = microservice_api.get_users()
+        response: Response = microservice_api.create_user()
         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
         ErrorParams.model_validate(response.json())
 
     def test_post_incorrect_path_in_url(self, microservice_api: 'MicroserviceApi'):
-        response: Response = microservice_api.get_user(1)
+        response: Response = microservice_api.create_user(path_extension='1')
         assert response.status_code == HTTPStatus.METHOD_NOT_ALLOWED
         ErrorParams.model_validate(response.json())
 
@@ -241,7 +240,9 @@ class TestsApi:
         assert response.json() == {"message": "User deleted"}
         assert not len(db_mydb.get_value('select first_name from users where id = 1'))
 
-    def test_delete_with_random_valid_data(self, microservice_api: 'MicroserviceApi', db_mydb: 'MyDB'):
+    def test_delete_with_random_valid_data(
+        self, microservice_api: 'MicroserviceApi', db_mydb: 'MyDB',
+    ):
         user_id: int = faker.Faker().random_choices(
             elements=db_mydb.get_value('select id from users order by id desc')[0],
             length=1,

@@ -1,8 +1,8 @@
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 
-import requests
 from requests import Response
+
 if TYPE_CHECKING:
 
     from tests.microservice_api import MicroserviceApi
