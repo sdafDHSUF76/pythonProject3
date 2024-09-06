@@ -6,6 +6,7 @@ import pytest
 from _pytest.python import Function
 
 from tests.fixtures.database import db_mydb  # noqa F401
+from tests.microservice_api import MicroserviceApi
 from tests.test_smoke import test_server_is_ready
 from tests.utils import fill_users_table
 
@@ -20,22 +21,26 @@ def prepare_table_users(db_mydb: 'MyDB'):
     fill_users_table(db_mydb)
 
 
-@pytest.fixture(scope='session', autouse=True)
-def create_envs():
+@pytest.fixture(scope='session')
+def env(request) -> str:
     """Создаем переменные окружения на компьютере.
 
     Код не мой, но решил оставить.
     """
-    dotenv.load_dotenv(''.join((os.path.abspath(__file__).split('tests')[0], '.env.docker')))
+    return request.config.getoption('--env')
+
+
+def pytest_addoption(parser):
+    parser.addoption('--env', default='test')
 
 
 @pytest.fixture(scope='session')
-def app_url() -> str:
-    """Получение из переменной окружения переменной APP_URL.
+def microservice_api(env: str) -> MicroserviceApi:
+    """Создаем переменные окружения на компьютере.
 
-    Код не мой, но решил оставить как есть.
+    Код не мой, но решил оставить.
     """
-    return os.getenv("APP_URL")
+    return MicroserviceApi(env)
 
 
 def pytest_collection_modifyitems(items: list[Function]):
