@@ -1,6 +1,3 @@
-import os
-
-import dotenv
 from requests import Response, Session
 
 from app.shemas.user import UserCreate, UserUpdate

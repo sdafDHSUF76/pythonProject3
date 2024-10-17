@@ -35,7 +35,8 @@ def env(request: 'SubRequest') -> Configs:
         'test': dotenv.load_dotenv(''.join((part_of_way, '.env.docker'))),
         'dev': dotenv.load_dotenv(''.join((part_of_way, '.env.docker'))),
         'preprod': dotenv.load_dotenv(''.join((part_of_way, '.env.docker'))),
-    }[request.config.getoption('--env')]  # не стал создавать .env.dev, .env.preprod и так тоже хорошо выглядит
+    }[request.config.getoption('--env')]
+    # не стал создавать .env.dev, .env.preprod и так тоже хорошо выглядит
     return Configs.parse_obj({'base_url': os.getenv("APP_URL")})
 
 
