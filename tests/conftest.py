@@ -1,10 +1,13 @@
+import os
 from typing import TYPE_CHECKING
 
+import dotenv
 import pytest
 from _pytest.python import Function
 
 from tests.fixtures.database import db_mydb  # noqa F401
 from tests.microservice_api import MicroserviceApi
+from tests.shemas import Configs
 from tests.test_smoke import test_server_is_ready
 from tests.utils import fill_users_table
 
@@ -22,12 +25,18 @@ def prepare_table_users(db_mydb: 'MyDB'):
 
 
 @pytest.fixture(scope='session')
-def env(request: 'SubRequest') -> str:
+def env(request: 'SubRequest') -> Configs:
     """Создаем переменные окружения на компьютере.
 
     Код не мой, но решил оставить.
     """
-    return request.config.getoption('--env')
+    part_of_way: str = os.path.abspath(__file__).split('tests')[0]
+    {
+        'test': dotenv.load_dotenv(''.join((part_of_way, '.env.docker'))),
+        'dev': dotenv.load_dotenv(''.join((part_of_way, '.env.docker'))),
+        'preprod': dotenv.load_dotenv(''.join((part_of_way, '.env.docker'))),
+    }[request.config.getoption('--env')]  # не стал создавать .env.dev, .env.preprod и так тоже хорошо выглядит
+    return Configs.parse_obj({'base_url': os.getenv("APP_URL")})
 
 
 def pytest_addoption(parser: 'Parser'):
@@ -35,7 +44,7 @@ def pytest_addoption(parser: 'Parser'):
 
 
 @pytest.fixture(scope='session')
-def microservice_api(env: str) -> MicroserviceApi:
+def microservice_api(env: Configs) -> MicroserviceApi:
     """Создаем переменные окружения на компьютере.
 
     Код не мой, но решил оставить.

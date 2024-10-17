@@ -4,18 +4,13 @@ import dotenv
 from requests import Response, Session
 
 from app.shemas.user import UserCreate, UserUpdate
+from tests.shemas import Configs
 
 
 class MicroserviceApi(Session):
-    def __init__(self, env: str):
+    def __init__(self, env: Configs):
         super().__init__()
-        part_of_way: str = os.path.abspath(__file__).split('tests')[0]
-        {
-            'test': dotenv.load_dotenv(''.join((part_of_way, '.env.docker'))),
-            'dev': dotenv.load_dotenv(''.join((part_of_way, '.env.docker'))),
-            'preprod': dotenv.load_dotenv(''.join((part_of_way, '.env.docker'))),
-        }[env]  # не стал создавать .env.dev, .env.preprod и так тоже хорошо выглядит
-        self.base_url = f'{os.getenv("APP_URL")}'
+        self.base_url = env.base_url
 
     def request(self, method: str, url: str, **another_data_for_request) -> Response:
         full_url = ''.join((self.base_url, url))
